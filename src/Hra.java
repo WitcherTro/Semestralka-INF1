@@ -29,7 +29,8 @@ public class Hra extends JPanel implements Runnable {
         //this.setBackground(Color.cyan);
         skok = new skok();
 
-        this.getInputMap().put(KeyStroke.getKeyStroke("SPACE"),"skok");
+
+        this.getInputMap(this.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0),"skok");
         this.getActionMap().put("skok",skok);
 
         this.pozadie = new Pozadie();
@@ -242,6 +243,7 @@ public class Hra extends JPanel implements Runnable {
         @Override
         public void actionPerformed(ActionEvent e) {
             jump();
+            System.out.println("skok");
         }
     }
 }

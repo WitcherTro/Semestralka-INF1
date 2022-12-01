@@ -9,8 +9,8 @@ public class Main {
         Okno okno = new Okno();
         Hra hra = new Hra();
         okno.add(hra);
-        okno.pack();
         hra.startHernyThread();
+        okno.pack();
 
         //okno.add(menu);
     }
