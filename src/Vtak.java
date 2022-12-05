@@ -1,10 +1,12 @@
-import java.awt.*;
+import java.awt.Rectangle;
+import java.awt.Graphics2D;
+import java.awt.Color;
 
 public class Vtak {
     private Rectangle vtak;
 
     public Vtak() {
-        this.vtak = new Rectangle(Okno.getWIDTH()/2, Okno.getHEIGTH()/2, 20, 20);
+        this.vtak = new Rectangle(Okno.getWIDTH() / 2, Okno.getHEIGTH() / 2, 20, 20);
     }
 
     public void vykresliVtaka(Graphics2D g2d) {
