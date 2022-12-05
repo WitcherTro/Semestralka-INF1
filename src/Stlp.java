@@ -1,11 +1,15 @@
-import java.awt.*;
+import java.awt.Rectangle;
+import java.awt.Graphics2D;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class Stlp {
 
     private Random rand;
-    private int medzera,sirka,vyska;
+    private int medzera;
+    private int sirka;
+    private int vyska;
     private ArrayList<Rectangle> stlpy;
 
     public Stlp() {

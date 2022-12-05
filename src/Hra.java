@@ -2,36 +2,34 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 public class Hra extends JPanel implements Runnable {
-
-
     private Stlp stlp;
     private Vtak vtak;
-
     private Pozadie pozadie;
-
-    private boolean gameOver, started;
-
-    private int yPohyb, tik, fpscounter, skore, highskore;
-
+    private boolean gameOver, started, paused;
+    private int fpscounter, skore, highskore;
+    private double yPohyb;
     private static final int FPS = 60;
-
     Thread hernyThread;
-
     Action skok;
-
+    Action navratDoMenu;
+    Action pauza;
     public Hra() {
         this.setPreferredSize(new Dimension(Okno.getWIDTH(), Okno.getHEIGTH()));
         this.setDoubleBuffered(true);
         this.setFocusable(true);
-        //this.setBackground(Color.cyan);
         skok = new skok();
+        navratDoMenu = new navratDoMenu();
+        pauza = new pauza();
 
 
         this.getInputMap(this.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0),"skok");
         this.getActionMap().put("skok",skok);
+        this.getInputMap(this.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_T, 0),"Pauza");
+        this.getActionMap().put("Pauza",pauza);
+        this.getInputMap(this.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),"navratDoMenu");
+        this.getActionMap().put("navratDoMenu", navratDoMenu);
 
         this.pozadie = new Pozadie();
         this.vtak = new Vtak();
@@ -42,17 +40,7 @@ public class Hra extends JPanel implements Runnable {
         this.stlp.pridajStlp(true);
         this.stlp.pridajStlp(true);
         this.stlp.pridajStlp(true);
-
-        this.tik = 0;
-
     }
-
-    /*public void paintStatic(Graphics g) {
-        super.paintComponent(g);
-
-        Graphics2D g2d = (Graphics2D) g;
-
-    }*/
     public void jump() {
 
         if (gameOver) {
@@ -72,10 +60,32 @@ public class Hra extends JPanel implements Runnable {
             if (yPohyb > 0) {
                 yPohyb = 0;
             }
-            yPohyb -= 15;
+            yPohyb -= 10;
         }
     }
 
+    public void pause() {
+        if (started && !gameOver) {
+            started = false;
+            paused = true;
+        } else if (paused && !gameOver) {
+            started = true;
+        }
+    }
+    public void menu() {
+        if (gameOver) {
+            started = false;
+            this.vtak = new Vtak();
+            this.stlp.getStlpy().clear();
+            yPohyb = 0;
+            skore = 0;
+            this.stlp.pridajStlp(true);
+            this.stlp.pridajStlp(true);
+            this.stlp.pridajStlp(true);
+            this.stlp.pridajStlp(true);
+            gameOver = false;
+        }
+    }
 
     public void startHernyThread() {
         hernyThread = new Thread(this);
@@ -100,7 +110,7 @@ public class Hra extends JPanel implements Runnable {
             minulyCas = terajsiCas;
 
             if (delta >= 1) {
-                update2();
+                update();
                 repaint();
                 delta--;
                 pocetvykresleni++;
@@ -114,15 +124,10 @@ public class Hra extends JPanel implements Runnable {
             }
         }
     }
-    public void update2() {
-         if (this.tik % 2 == 0) {
-             update();
-         }
-         tik++;
-    }
+
 
     public void update() {
-        int rychlost = 10;
+        int rychlost = 6;
         if (started) {
             //pohyb stlpov
             for (int i = 0; i < this.stlp.getStlpy().size(); i++) {
@@ -131,8 +136,7 @@ public class Hra extends JPanel implements Runnable {
             }
             //yPohyb
             if (yPohyb < 15) {
-                //ypohyb++ * 2
-                yPohyb += 2;
+                yPohyb += 0.7;
             }
             //vymazanie stlpu ked zmizne za obrazovku
             for (int i = 0; i < this.stlp.getStlpy().size(); i++) {
@@ -145,13 +149,14 @@ public class Hra extends JPanel implements Runnable {
                     }
                 }
             }
-            this.vtak.setVtakY(this.vtak.getVtak().y + yPohyb);
+            this.vtak.setVtakY((int) (this.vtak.getVtak().y + yPohyb));
 
             //akcie so stlpmi
             for (Rectangle stlp : this.stlp.getStlpy()) {
+                int i = 0;
                 //prida skore ak vtak preleti cez stlpy
-                if (stlp.y == 0 && this.vtak.getVtak().x + this.vtak.getVtak().width / 2 > stlp.x + stlp.width / 2 - 10
-                        && this.vtak.getVtak().x + this.vtak.getVtak().width / 2 < stlp.x + stlp.width / 2 + 10) {
+                if (stlp.y == 0 && this.vtak.getVtak().x + this.vtak.getVtak().width / 2 > stlp.x + stlp.width / 2 - 1
+                        && this.vtak.getVtak().x + this.vtak.getVtak().width / 2 < stlp.x + stlp.width / 2 + 1) {
                     skore++;
 
 
@@ -202,22 +207,23 @@ public class Hra extends JPanel implements Runnable {
         g.setColor(Color.white);
         g.setFont(new Font("Arial", 0, 100));
 
-        if (!started) {
+        if (!started && !paused) {
             g.drawString("Začni hrať!", 150, Okno.getHEIGTH()/2 - 50);
             g.setFont(new Font("Arial", 0, 30));
-            g.drawString("Stlač medzerník alebo lave tlačidlo myši.", 125, Okno.getHEIGTH()/2 - 10);
-            g.drawString("Stlač R aby si vymazal najvyššie skore.", 125, Okno.getHEIGTH() - 60);
+            g.drawString("Stlač medzerník.", 300, Okno.getHEIGTH()/2 - 10);
+            //g.drawString("Stlač R aby si vymazal najvyššie skore.", 125, Okno.getHEIGTH() - 60);
 
             g.setFont(new Font("Arial", 0, 15));
-            g.drawString("Verzia 0.4", Okno.getWIDTH() - 100, Okno.getHEIGTH() - 50);
+            g.drawString("Verzia 0.6", Okno.getWIDTH() - 100, Okno.getHEIGTH() - 50);
 
         }
 
         if (gameOver) {
             g.drawString("Koniec hry!", 150, Okno.getHEIGTH()/2 - 60);
             g.setFont(new Font("Arial", 0, 30));
-            g.drawString("Stlač medzerník alebo lave tlačidlo myši.", 125, Okno.getHEIGTH()/2 - 10);
-            g.drawString("Stlač R aby si vymazal najvyššie skore.", 125, Okno.getHEIGTH() - 60);
+            g.drawString("Stlač medzerník aby si znova začal hrat", 140, Okno.getHEIGTH()/2 - 10);
+            g.setFont(new Font("Arial", 0, 30));
+            g.drawString("Stlač ESC pre vratenie na uvodnu obrazovku", 120, Okno.getHEIGTH() - 60);
 
 
         }
@@ -227,15 +233,30 @@ public class Hra extends JPanel implements Runnable {
             } else {
                 g.drawString(String.valueOf(skore), Okno.getWIDTH() / 2 - 50, 150);
             }
+            g.setFont(new Font("Arial", 0, 30));
+            g.drawString("Stlač T pre pozastavenie hry", 200, Okno.getHEIGTH() - 60);
         }
         if (gameOver || started || !started) {
             g.setFont(new Font("Arial", 0, 30));
             g.drawString("Najvyššie skore: " + String.valueOf(highskore), Okno.getWIDTH() / 2 - 130, 30);
             g.setFont(new Font("Arial", 0, 10));
             g.setColor(Color.black);
-            g.drawString("FPS: " + String.valueOf(fpscounter), Okno.getWIDTH() - 40, 15);
+            g.drawString("FPS: " + String.valueOf(fpscounter), Okno.getWIDTH() - 38, 10);
         }
+        if (paused && !started) {
+            g.setColor(Color.white);
+            g.setFont(new Font("Arial", 0, 80));
+            g.drawString("Pozastavená hra", 100, Okno.getHEIGTH()/2);
+            g.setFont(new Font("Arial", 0, 30));
+            g.drawString("Pre pokračovanie stlač ESC alebo medzernik", 105, Okno.getHEIGTH()/2 + 30);
+            g.setFont(new Font("Arial", 0, 100));
+            if (skore < 10) {
+                g.drawString(String.valueOf(skore), Okno.getWIDTH() / 2 - 25, 150);
+            } else {
+                g.drawString(String.valueOf(skore), Okno.getWIDTH() / 2 - 50, 150);
+            }
 
+        }
         g2d.dispose();
     }
 
@@ -246,4 +267,17 @@ public class Hra extends JPanel implements Runnable {
             System.out.println("skok");
         }
     }
+    public class navratDoMenu extends AbstractAction{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            menu();
+        }
+    }
+    public class pauza extends AbstractAction{
+    @Override
+        public void actionPerformed(ActionEvent e) {
+        pause();
+        }
+    }
 }
+

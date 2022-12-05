@@ -1,22 +1,16 @@
-import javax.swing.JFrame;
-import java.awt.*;
+import javax.swing.*;
 
-public class Okno extends JFrame{
+public class Okno extends JFrame {
     private static final int WIDTH = 800, HEIGTH = 800;
 
     Okno() {
-        this.setTitle("Vtaaaak");
+        this.setTitle("Semestralka");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(WIDTH,HEIGTH);
         this.setResizable(false);
         this.setVisible(true);
-        //jframe.add(renderer);
-        //jframe.addMouseListener(this);
-        //jframe.addKeyListener(this);
-
 
     }
-
     public static int getWIDTH() {
         return WIDTH;
     }
