@@ -10,11 +10,12 @@ import java.awt.Font;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 
 public class Hra extends JPanel implements Runnable {
-    private Stlp stlp;
+    private final Stlp stlp;
     private Vtak vtak;
-    private Pozadie pozadie;
+    private final Pozadie pozadie;
     private boolean gameOver;
     private boolean started;
     private boolean paused;
@@ -24,16 +25,21 @@ public class Hra extends JPanel implements Runnable {
     private double yPohyb;
     private static final int FPS = 60;
     private Thread hernyThread;
-    private Action skok;
-    private Action navratDoMenu;
-    private Action pauza;
-    public Hra() {
+    private final Action skok;
+    private final Action navratDoMenu;
+    private final Action pauza;
+    private final Action resetSkore;
+    private suborHighScore suborSkore;
+    public Hra() throws IOException {
         this.setPreferredSize(new Dimension(Okno.getWIDTH(), Okno.getHEIGTH()));
         this.setDoubleBuffered(true);
         this.setFocusable(true);
         this.skok = new Skok();
         this.navratDoMenu = new NavratDoMenu();
         this.pauza = new Pauza();
+        this.suborSkore = new suborHighScore();
+        this.resetSkore = new ResetSkore();
+        this.highskore = this.suborSkore.getHighScore();
 
 
         this.getInputMap(this.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "skok");
@@ -42,6 +48,9 @@ public class Hra extends JPanel implements Runnable {
         this.getActionMap().put("Pauza", this.pauza);
         this.getInputMap(this.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "navratDoMenu");
         this.getActionMap().put("navratDoMenu", this.navratDoMenu);
+        this.getInputMap(this.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_R, 0), "resetSkore");
+        this.getActionMap().put("resetSkore", this.resetSkore);
+
 
         this.pozadie = new Pozadie();
         this.vtak = new Vtak();
@@ -67,6 +76,7 @@ public class Hra extends JPanel implements Runnable {
         }
         if (!this.started) {
             this.started = true;
+            this.paused = false;
         } else if (!this.gameOver) {
             if (this.yPohyb > 0) {
                 this.yPohyb = 0;
@@ -84,7 +94,7 @@ public class Hra extends JPanel implements Runnable {
         }
     }
     public void menu() {
-        if (this.gameOver) {
+        if (this.gameOver && !this.paused) {
             this.started = false;
             this.vtak = new Vtak();
             this.stlp.getStlpy().clear();
@@ -96,6 +106,10 @@ public class Hra extends JPanel implements Runnable {
             this.stlp.pridajStlp(true);
             this.gameOver = false;
         }
+    }
+    public void resetskore() throws IOException {
+        this.highskore = 0;
+        this.suborSkore.setHighScore(this.highskore);
     }
 
     public void startHernyThread() {
@@ -121,7 +135,11 @@ public class Hra extends JPanel implements Runnable {
             minulyCas = terajsiCas;
 
             if (delta >= 1) {
-                this.update();
+                try {
+                    this.update();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
                 repaint();
                 delta--;
                 pocetvykresleni++;
@@ -136,7 +154,7 @@ public class Hra extends JPanel implements Runnable {
     }
 
 
-    public void update() {
+    public void update() throws IOException {
         int rychlost = 6;
         if (this.started) {
             //pohyb stlpov
@@ -174,6 +192,7 @@ public class Hra extends JPanel implements Runnable {
                 //gameover ak vtak sa trafi so stlpom
                 if (stlpS.intersects(this.vtak.getVtak())) {
                     this.gameOver = true;
+                    this.paused = false;
                     //stlp zoberie vtaka za obrazovku
                     if (this.vtak.getVtak().x <= stlpS.x) {
                         this.vtak.setVtakX(stlpS.x - this.vtak.getVtak().width);
@@ -182,7 +201,7 @@ public class Hra extends JPanel implements Runnable {
                         if (stlpS.y != 0) {
                             this.vtak.setVtakY(this.vtak.getVtak().y - this.vtak.getVtak().height);
                             //kod aby vtak nespadol do spodneho stlpu
-                        } else if (this.vtak.getVtak().y < stlpS.height) {
+                        } else if (this.vtak.getVtak().y <= stlpS.height) {
                             this.vtak.setVtakY(stlpS.height);
                         }
                     }
@@ -190,10 +209,12 @@ public class Hra extends JPanel implements Runnable {
             }
             if (!this.gameOver && this.highskore < this.skore) {
                 this.highskore = this.skore;
+                this.suborSkore.setHighScore(this.highskore);
             }
             //gamover ak vtak trafi zem alebo vyleti nad hernu plochu
             if (this.vtak.getVtak().y > Okno.getHEIGTH() - this.vtak.getVtak().height - 170 || this.vtak.getVtak().y < 0) {
                 this.gameOver = true;
+                this.paused = false;
             }
             //vtak nespadne pod hernu plochu
             if (this.vtak.getVtak().y + this.yPohyb >= Okno.getHEIGTH() - 150) {
@@ -204,16 +225,12 @@ public class Hra extends JPanel implements Runnable {
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         Graphics2D g2d = (Graphics2D)g;
         this.pozadie.vykresliPozadie(g2d);
-
         for (Rectangle stlpy : this.stlp.getStlpy()) {
             this.stlp.vykresliStlp(g2d, stlpy);
         }
-
         this.vtak.vykresliVtaka(g2d);
-
         g.setColor(Color.white);
         g.setFont(new Font("Arial", 0, 100));
 
@@ -221,9 +238,9 @@ public class Hra extends JPanel implements Runnable {
             g.drawString("Začni hrať!", 150, Okno.getHEIGTH() / 2 - 50);
             g.setFont(new Font("Arial", 0, 30));
             g.drawString("Stlač medzerník.", 300, Okno.getHEIGTH() / 2 - 10);
-            //g.drawString("Stlač R aby si vymazal najvyššie skore.", 125, Okno.getHEIGTH() - 60);
+            g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 150, Okno.getHEIGTH() - 25);
             g.setFont(new Font("Arial", 0, 15));
-            g.drawString("Verzia 0.6", Okno.getWIDTH() - 100, Okno.getHEIGTH() - 50);
+            g.drawString("Verzia 0.7", Okno.getWIDTH() - 70, Okno.getHEIGTH() - 5);
 
         }
 
@@ -233,6 +250,7 @@ public class Hra extends JPanel implements Runnable {
             g.drawString("Stlač medzerník aby si znova začal hrat", 140, Okno.getHEIGTH() / 2 - 10);
             g.setFont(new Font("Arial", 0, 30));
             g.drawString("Stlač ESC pre vratenie na uvodnu obrazovku", 120, Okno.getHEIGTH() - 60);
+            g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 150, Okno.getHEIGTH() - 25);
 
 
         }
@@ -244,6 +262,7 @@ public class Hra extends JPanel implements Runnable {
             }
             g.setFont(new Font("Arial", 0, 30));
             g.drawString("Stlač T pre pozastavenie hry", 200, Okno.getHEIGTH() - 60);
+            g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 150, Okno.getHEIGTH() - 25);
         }
         if (this.gameOver || this.started || !this.started) {
             g.setFont(new Font("Arial", 0, 30));
@@ -252,12 +271,13 @@ public class Hra extends JPanel implements Runnable {
             g.setColor(Color.black);
             g.drawString("FPS: " + String.valueOf(this.fpscounter), Okno.getWIDTH() - 38, 10);
         }
-        if (this.paused && !this.started) {
+        if (this.paused && !this.started && !this.gameOver) {
             g.setColor(Color.white);
             g.setFont(new Font("Arial", 0, 80));
             g.drawString("Pozastavená hra", 100, Okno.getHEIGTH() / 2);
             g.setFont(new Font("Arial", 0, 30));
-            g.drawString("Pre pokračovanie stlač ESC alebo medzernik", 105, Okno.getHEIGTH() / 2 + 30);
+            g.drawString("Pre pokračovanie stlač T alebo medzernik", 125, Okno.getHEIGTH() / 2 + 30);
+            g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 150, Okno.getHEIGTH() - 25);
             g.setFont(new Font("Arial", 0, 100));
             if (this.skore < 10) {
                 g.drawString(String.valueOf(this.skore), Okno.getWIDTH() / 2 - 25, 150);
@@ -272,7 +292,6 @@ public class Hra extends JPanel implements Runnable {
         @Override
         public void actionPerformed(ActionEvent e) {
             Hra.this.jump();
-            System.out.println("skok");
         }
     }
     public class NavratDoMenu extends AbstractAction {
@@ -285,6 +304,16 @@ public class Hra extends JPanel implements Runnable {
         @Override
         public void actionPerformed(ActionEvent e) {
             Hra.this.pause();
+        }
+    }
+    public class ResetSkore extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                Hra.this.resetskore();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 }
