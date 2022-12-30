@@ -4,14 +4,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class suborHighScore {
+public class SuborHighScore {
 
     private File subor;
 
-    public suborHighScore() throws IOException {
-       this.subor = new File("highscore.txt");
+    public SuborHighScore() throws IOException {
+        this.subor = new File("highscore.txt");
 
-        if (this.subor.createNewFile()){
+        if (this.subor.createNewFile()) {
             FileWriter zapisovac = new FileWriter("highscore.txt");
             zapisovac.write("0");
             zapisovac.close();

@@ -1,7 +1,4 @@
-import javax.swing.JPanel;
-import javax.swing.Action;
-import javax.swing.KeyStroke;
-import javax.swing.AbstractAction;
+import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Graphics;
@@ -29,7 +26,10 @@ public class Hra extends JPanel implements Runnable {
     private final Action navratDoMenu;
     private final Action pauza;
     private final Action resetSkore;
-    private suborHighScore suborSkore;
+    private final Action zmenaObtiaznosti;
+    private SuborHighScore suborSkore;
+    private int moznostObtiaznosti;
+
     public Hra() throws IOException {
         this.setPreferredSize(new Dimension(Okno.getWIDTH(), Okno.getHEIGTH()));
         this.setDoubleBuffered(true);
@@ -37,9 +37,11 @@ public class Hra extends JPanel implements Runnable {
         this.skok = new Skok();
         this.navratDoMenu = new NavratDoMenu();
         this.pauza = new Pauza();
-        this.suborSkore = new suborHighScore();
+        this.suborSkore = new SuborHighScore();
         this.resetSkore = new ResetSkore();
         this.highskore = this.suborSkore.getHighScore();
+        this.zmenaObtiaznosti = new ZmenaObtiaznosti();
+
 
 
         this.getInputMap(this.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "skok");
@@ -50,18 +52,22 @@ public class Hra extends JPanel implements Runnable {
         this.getActionMap().put("navratDoMenu", this.navratDoMenu);
         this.getInputMap(this.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_R, 0), "resetSkore");
         this.getActionMap().put("resetSkore", this.resetSkore);
+        this.getInputMap(this.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0), "zmenaObtiaznosti");
+        this.getActionMap().put("zmenaObtiaznosti", this.zmenaObtiaznosti);
 
 
         this.pozadie = new Pozadie();
         this.vtak = new Vtak();
         this.stlp = new Stlp();
+        this.stlp.setMedzera(Obtiaznost.LAHKA.getCislo());
 
         this.stlp.pridajStlp(true);
         this.stlp.pridajStlp(true);
         this.stlp.pridajStlp(true);
         this.stlp.pridajStlp(true);
+
     }
-    public void jump() {
+    public void jump() throws IOException {
 
         if (this.gameOver) {
             this.vtak = new Vtak();
@@ -91,9 +97,10 @@ public class Hra extends JPanel implements Runnable {
             this.paused = true;
         } else if (this.paused && !this.gameOver) {
             this.started = true;
+            this.paused = false;
         }
     }
-    public void menu() {
+    public void menu() throws IOException {
         if (this.gameOver && !this.paused) {
             this.started = false;
             this.vtak = new Vtak();
@@ -115,6 +122,26 @@ public class Hra extends JPanel implements Runnable {
     public void startHernyThread() {
         this.hernyThread = new Thread(this);
         this.hernyThread.start();
+    }
+    public void zmenObtiaznost() {
+        if(!started) {
+            this.stlp.getStlpy().clear();
+            switch (this.stlp.getMedzera()) {
+                case 400:
+                    this.stlp.setMedzera(Obtiaznost.STREDNA.getCislo());
+                    break;
+                case 320:
+                    this.stlp.setMedzera(Obtiaznost.TAZKA.getCislo());
+                    break;
+                case 280:
+                    this.stlp.setMedzera(Obtiaznost.LAHKA.getCislo());
+                    break;
+            }
+            this.stlp.pridajStlp(true);
+            this.stlp.pridajStlp(true);
+            this.stlp.pridajStlp(true);
+            this.stlp.pridajStlp(true);
+        }
     }
 
     @Override
@@ -192,15 +219,14 @@ public class Hra extends JPanel implements Runnable {
                 //gameover ak vtak sa trafi so stlpom
                 if (stlpS.intersects(this.vtak.getVtak())) {
                     this.gameOver = true;
-                    this.paused = false;
                     //stlp zoberie vtaka za obrazovku
                     if (this.vtak.getVtak().x <= stlpS.x) {
                         this.vtak.setVtakX(stlpS.x - this.vtak.getVtak().width);
                     } else {
-                        //kod aby vtak nevyletel do horneho stlpu
+                        //kod aby vtak nevyletel do dolneho stlpu
                         if (stlpS.y != 0) {
-                            this.vtak.setVtakY(this.vtak.getVtak().y - this.vtak.getVtak().height);
-                            //kod aby vtak nespadol do spodneho stlpu
+                            this.vtak.setVtakY(this.vtak.getVtak().y - this.vtak.getVtak().height + 10);
+                            //kod aby vtak nespadol do horneho stlpu
                         } else if (this.vtak.getVtak().y <= stlpS.height) {
                             this.vtak.setVtakY(stlpS.height);
                         }
@@ -238,10 +264,22 @@ public class Hra extends JPanel implements Runnable {
             g.drawString("Začni hrať!", 150, Okno.getHEIGTH() / 2 - 50);
             g.setFont(new Font("Arial", 0, 30));
             g.drawString("Stlač medzerník.", 300, Okno.getHEIGTH() / 2 - 10);
-            g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 150, Okno.getHEIGTH() - 25);
+            g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 100, Okno.getHEIGTH() - 25);
+            g.drawString("Stlač P pre zmenenie obtiaznosti", 120, Okno.getHEIGTH() - 70);
             g.setFont(new Font("Arial", 0, 15));
-            g.drawString("Verzia 0.7", Okno.getWIDTH() - 70, Okno.getHEIGTH() - 5);
-
+            g.drawString("Verzia 0.8", Okno.getWIDTH() - 70, Okno.getHEIGTH() - 5);
+            g.setFont(new Font("Arial", 0, 20));
+            switch (this.stlp.getMedzera()) {
+                case 400:
+                    g.drawString("Obtiaznost: Lahka", Okno.getWIDTH() - 230, Okno.getHEIGTH() - 70);
+                    break;
+                case 320:
+                    g.drawString("Obtiaznost: Stredna", Okno.getWIDTH() - 230, Okno.getHEIGTH() - 70);
+                    break;
+                case 280:
+                    g.drawString("Obtiaznost: Tazka", Okno.getWIDTH() - 230, Okno.getHEIGTH() - 70);
+                    break;
+            }
         }
 
         if (this.gameOver) {
@@ -249,8 +287,8 @@ public class Hra extends JPanel implements Runnable {
             g.setFont(new Font("Arial", 0, 30));
             g.drawString("Stlač medzerník aby si znova začal hrat", 140, Okno.getHEIGTH() / 2 - 10);
             g.setFont(new Font("Arial", 0, 30));
-            g.drawString("Stlač ESC pre vratenie na uvodnu obrazovku", 120, Okno.getHEIGTH() - 60);
-            g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 150, Okno.getHEIGTH() - 25);
+            g.drawString("Stlač ESC pre vratenie na uvodnu obrazovku", 100, Okno.getHEIGTH() - 60);
+            g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 100, Okno.getHEIGTH() - 25);
 
 
         }
@@ -262,7 +300,7 @@ public class Hra extends JPanel implements Runnable {
             }
             g.setFont(new Font("Arial", 0, 30));
             g.drawString("Stlač T pre pozastavenie hry", 200, Okno.getHEIGTH() - 60);
-            g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 150, Okno.getHEIGTH() - 25);
+            g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 100, Okno.getHEIGTH() - 25);
         }
         if (this.gameOver || this.started || !this.started) {
             g.setFont(new Font("Arial", 0, 30));
@@ -277,7 +315,7 @@ public class Hra extends JPanel implements Runnable {
             g.drawString("Pozastavená hra", 100, Okno.getHEIGTH() / 2);
             g.setFont(new Font("Arial", 0, 30));
             g.drawString("Pre pokračovanie stlač T alebo medzernik", 125, Okno.getHEIGTH() / 2 + 30);
-            g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 150, Okno.getHEIGTH() - 25);
+            g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 100, Okno.getHEIGTH() - 25);
             g.setFont(new Font("Arial", 0, 100));
             if (this.skore < 10) {
                 g.drawString(String.valueOf(this.skore), Okno.getWIDTH() / 2 - 25, 150);
@@ -291,13 +329,21 @@ public class Hra extends JPanel implements Runnable {
     public class Skok extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            Hra.this.jump();
+            try {
+                Hra.this.jump();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
     public class NavratDoMenu extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
-            Hra.this.menu();
+            try {
+                Hra.this.menu();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
     public class Pauza extends AbstractAction {
@@ -314,6 +360,12 @@ public class Hra extends JPanel implements Runnable {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
+        }
+    }
+    public class ZmenaObtiaznosti extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Hra.this.zmenObtiaznost();
         }
     }
 }

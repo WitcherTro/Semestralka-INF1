@@ -1,6 +1,7 @@
-import java.awt.Rectangle;
-import java.awt.Graphics2D;
-import java.awt.Color;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -12,11 +13,14 @@ public class Stlp {
     private int vyska;
     private ArrayList<Rectangle> stlpy;
 
-    public Stlp() {
+    private BufferedImage fotkastlp;
 
-        this.medzera = 300;
+    public Stlp() throws IOException {
+
+        this.medzera = 320;
         this.sirka = 100;
         this.stlpy = new ArrayList<Rectangle>();
+        this.fotkastlp = ImageIO.read(getClass().getResourceAsStream("images/stlp.png"));
     }
 
     public void pridajStlp(boolean start) {
@@ -33,8 +37,21 @@ public class Stlp {
     }
 
     public void vykresliStlp(Graphics2D g2d, Rectangle stlpy) {
-        g2d.setColor(Color.GREEN.darker());
+
+        TexturePaint tp = new TexturePaint(this.fotkastlp, new Rectangle(0, 0, 24, 24));
+        g2d.setPaint(tp);
+        //g2d.setColor(Color.green);
         g2d.fillRect(stlpy.x, stlpy.y, stlpy.width, stlpy.height);
+        g2d.setStroke(new BasicStroke(10));
+        g2d.setColor(Color.green.darker());
+        g2d.drawRect(stlpy.x, stlpy.y, stlpy.width, stlpy.height);
+    }
+    public void setMedzera(int hodnota) {
+        this.medzera = hodnota;
+    }
+
+    public int getMedzera() {
+        return this.medzera;
     }
 
     public ArrayList<Rectangle> getStlpy() {
