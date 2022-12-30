@@ -265,19 +265,19 @@ public class Hra extends JPanel implements Runnable {
             g.setFont(new Font("Arial", 0, 30));
             g.drawString("Stlač medzerník.", 300, Okno.getHEIGTH() / 2 - 10);
             g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 100, Okno.getHEIGTH() - 25);
-            g.drawString("Stlač P pre zmenenie obtiaznosti", 120, Okno.getHEIGTH() - 70);
+            g.drawString("Stlač P pre zmenenie obtiažnosti", 120, Okno.getHEIGTH() - 70);
             g.setFont(new Font("Arial", 0, 15));
-            g.drawString("Verzia 0.8", Okno.getWIDTH() - 70, Okno.getHEIGTH() - 5);
+            g.drawString("Verzia 0.8.1", Okno.getWIDTH() - 70, Okno.getHEIGTH() - 5);
             g.setFont(new Font("Arial", 0, 20));
             switch (this.stlp.getMedzera()) {
                 case 400:
-                    g.drawString("Obtiaznost: Lahka", Okno.getWIDTH() - 230, Okno.getHEIGTH() - 70);
+                    g.drawString("Obtiažnosť: Ľahká", Okno.getWIDTH() - 230, Okno.getHEIGTH() - 70);
                     break;
                 case 320:
-                    g.drawString("Obtiaznost: Stredna", Okno.getWIDTH() - 230, Okno.getHEIGTH() - 70);
+                    g.drawString("Obtiažnosť: Stredná", Okno.getWIDTH() - 230, Okno.getHEIGTH() - 70);
                     break;
                 case 280:
-                    g.drawString("Obtiaznost: Tazka", Okno.getWIDTH() - 230, Okno.getHEIGTH() - 70);
+                    g.drawString("Obtiažnosť: Ťažká", Okno.getWIDTH() - 230, Okno.getHEIGTH() - 70);
                     break;
             }
         }
