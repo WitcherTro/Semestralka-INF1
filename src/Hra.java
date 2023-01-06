@@ -1,4 +1,7 @@
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.Action;
+import javax.swing.KeyStroke;
+import javax.swing.AbstractAction;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Graphics;
@@ -59,7 +62,6 @@ public class Hra extends JPanel implements Runnable {
         this.pozadie = new Pozadie();
         this.vtak = new Vtak();
         this.stlp = new Stlp();
-        this.stlp.setMedzera(Obtiaznost.LAHKA.getCislo());
 
         this.stlp.pridajStlp(true);
         this.stlp.pridajStlp(true);
@@ -124,17 +126,17 @@ public class Hra extends JPanel implements Runnable {
         this.hernyThread.start();
     }
     public void zmenObtiaznost() {
-        if(!started) {
+        if (!this.started) {
             this.stlp.getStlpy().clear();
             switch (this.stlp.getMedzera()) {
                 case 400:
-                    this.stlp.setMedzera(Obtiaznost.STREDNA.getCislo());
+                    this.stlp.setMedzera(320);
                     break;
                 case 320:
-                    this.stlp.setMedzera(Obtiaznost.TAZKA.getCislo());
+                    this.stlp.setMedzera(280);
                     break;
                 case 280:
-                    this.stlp.setMedzera(Obtiaznost.LAHKA.getCislo());
+                    this.stlp.setMedzera(400);
                     break;
             }
             this.stlp.pridajStlp(true);
@@ -267,7 +269,7 @@ public class Hra extends JPanel implements Runnable {
             g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 100, Okno.getHEIGTH() - 25);
             g.drawString("Stlač P pre zmenenie obtiažnosti", 120, Okno.getHEIGTH() - 70);
             g.setFont(new Font("Arial", 0, 15));
-            g.drawString("Verzia 0.8.1", Okno.getWIDTH() - 70, Okno.getHEIGTH() - 5);
+            g.drawString("Verzia 0.8.1", Okno.getWIDTH() - 80, Okno.getHEIGTH() - 5);
             g.setFont(new Font("Arial", 0, 20));
             switch (this.stlp.getMedzera()) {
                 case 400:
@@ -323,7 +325,6 @@ public class Hra extends JPanel implements Runnable {
                 g.drawString(String.valueOf(this.skore), Okno.getWIDTH() / 2 - 50, 150);
             }
         }
-        g2d.dispose();
     }
 
     public class Skok extends AbstractAction {

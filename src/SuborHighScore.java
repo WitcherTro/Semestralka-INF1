@@ -8,6 +8,10 @@ public class SuborHighScore {
 
     private File subor;
 
+    /**
+     * Konstruktor nacitava subor "highscore.txt"
+     * v pripade ze subor neexistuje tak ho vytvori a zapise do neho "0"
+     */
     public SuborHighScore() throws IOException {
         this.subor = new File("highscore.txt");
 
@@ -18,6 +22,10 @@ public class SuborHighScore {
         }
     }
 
+    /**
+     * getter ziskava hodnotu zo suboru
+     * @return int hodnota v subore
+     */
     public int getHighScore() throws FileNotFoundException {
         Scanner citac = new Scanner(this.subor);
         int highscore = Integer.parseInt(citac.nextLine());
@@ -25,6 +33,10 @@ public class SuborHighScore {
         return highscore;
     }
 
+    /**
+     * setter zapisuje hodnotu do suboru
+     * @param skore hodnota ktora sa ma zapisat do suboru
+     */
     public void setHighScore(int skore) throws IOException {
         String textskore = Integer.toString(skore);
         FileWriter zapisovac = new FileWriter("highscore.txt");
