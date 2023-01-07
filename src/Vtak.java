@@ -4,12 +4,17 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+/**
+ * Trieda Vtak<br>
+ * tato trieda ma na starosti vytvorenie, vykreslenie a poloha vtaka
+ */
 public class Vtak {
     private Rectangle vtak;
     private BufferedImage vtakfotka;
 
     /**
      * Konstruktor vytvara stvorec vtaka a importuje fotku vtaka
+     * @throws IOException
      */
     public Vtak() throws IOException {
         this.vtak = new Rectangle(Okno.getWIDTH() / 2, Okno.getHEIGTH() / 2, 20, 20);

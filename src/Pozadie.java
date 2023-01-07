@@ -6,13 +6,17 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+/**
+ * Trieda Pozadie<br>
+ * tato trieda ma na starosti vytvorenie a vykreslenie pozadia
+ */
 public class Pozadie {
     private BufferedImage pozadiefotka;
     private BufferedImage zemfotka;
     private BufferedImage travafotka;
 
     /**
-     * Konstruktor triedy Pozadie
+     * Konstruktor triedy Pozadie<br>
      * nacitava obrazky vyuzite v pozadi
      * @throws IOException
      */
@@ -23,7 +27,7 @@ public class Pozadie {
     }
 
     /**
-     * vykresluje pozadie na herne okno
+     * vykresluje pozadie na herne okno<br>
      * vyuziva sa tu "TexturePaint" na nekonecne opakovanie maleho obrazku vo vacsom objekte
      */
     public void vykresliPozadie(Graphics2D g2d) {

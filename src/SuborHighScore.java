@@ -4,13 +4,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
+/**
+ * Trieda SuborHighScore
+ * tato trieda ma na starosti tvorbu textoveho suboru, zapisovanie a citanie z neho int hodnotu HighScore
+ */
 public class SuborHighScore {
 
     private File subor;
 
     /**
-     * Konstruktor nacitava subor "highscore.txt"
+     * Konstruktor nacitava subor "highscore.txt"<br>
      * v pripade ze subor neexistuje tak ho vytvori a zapise do neho "0"
+     * @throws IOException
      */
     public SuborHighScore() throws IOException {
         this.subor = new File("highscore.txt");
@@ -36,6 +41,7 @@ public class SuborHighScore {
     /**
      * setter zapisuje hodnotu do suboru
      * @param skore hodnota ktora sa ma zapisat do suboru
+     * @throws IOException
      */
     public void setHighScore(int skore) throws IOException {
         String textskore = Integer.toString(skore);

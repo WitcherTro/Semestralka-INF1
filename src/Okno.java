@@ -1,4 +1,12 @@
 import javax.swing.JFrame;
+
+/**
+ * Trieda Okno<br>
+ * tato trieda vytvara okno v ktorom sa bude cela hra zobrazovat<br><br>
+ *
+ * vyuzite videa:
+ * https://www.youtube.com/watch?v=Kmgo00avvEw
+ */
 public class Okno extends JFrame {
     private static final int WIDTH = 800;
     private static final int HEIGTH = 800;
@@ -7,7 +15,7 @@ public class Okno extends JFrame {
      * Kontruktor vytvara okno a nastavuje jeho moznosti
      */
     public Okno() {
-        this.setTitle("Semestralka");
+        this.setTitle("Leť a netraf");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(WIDTH, HEIGTH);
         this.setResizable(false);

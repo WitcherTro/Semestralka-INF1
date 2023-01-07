@@ -9,6 +9,10 @@ import java.awt.BasicStroke;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * Trieda Stlp
+ * tato trieda ma na starosti vytvorenie a vykreslenie stlpov
+ */
 public class Stlp {
 
     private int medzera;
@@ -18,8 +22,9 @@ public class Stlp {
     private final BufferedImage fotkastlp;
 
     /**
-     * Konstruktor triedy Stlp
+     * Konstruktor triedy Stlp<br>
      * nacitava obrazok stlpu
+     * @throws IOException
      */
     public Stlp() throws IOException {
 
@@ -30,9 +35,9 @@ public class Stlp {
     }
 
     /**
-     * pridava stlpy do ArrayListu
-     * pomocou booleanu naZaciatku sa odlisuje to,
-     * ci su to stlpy pridavane na zaciatku hry alebo neskor pocas hrania
+     * pridava stlpy do ArrayListu<br>
+     * pomocou booleanu naZaciatku sa odlisuje to<br>
+     * ci su to stlpy pridavane na zaciatku hry alebo neskor pocas hrania<br>
      * @param naZaciatku boolean ktory meni poziciu vytvorenia stlpov
      */
     public void pridajStlp(boolean naZaciatku) {
@@ -49,8 +54,8 @@ public class Stlp {
     }
 
     /**
-     * Vykresluje parameter stlpy do okna
-     * vyuziva sa tu "TexturePaint" na nekonecne opakovanie maleho obrazku vo vacsom objekte
+     * Vykresluje parameter stlpy do okna<br>
+     * vyuziva sa tu "TexturePaint" na nekonecne opakovanie maleho obrazku vo vacsom objekte<br>
      * obrazok je ohraniceny zelenym okrajom
      */
     public void vykresliStlp(Graphics2D g2d, Rectangle stlpy) {

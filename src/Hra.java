@@ -12,6 +12,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 
+/**
+ * Trieda hra<br>
+ * Trieda ma na starosti celu fyziku a vykreslovanie celej hry<br><br>
+ *
+ * Vyuzite videa:<br>
+ * https://www.youtube.com/watch?v=Kmgo00avvEw <br>
+ * https://www.youtube.com/watch?v=I1qTZaUcFX0 <br>
+ * https://www.youtube.com/watch?v=VpH33Uw-_0E <br>
+ * https://www.youtube.com/watch?v=om59cwR7psI
+ */
 public class Hra extends JPanel implements Runnable {
     private final Stlp stlp;
     private Vtak vtak;
@@ -31,8 +41,14 @@ public class Hra extends JPanel implements Runnable {
     private final Action resetSkore;
     private final Action zmenaObtiaznosti;
     private SuborHighScore suborSkore;
-    private int moznostObtiaznosti;
 
+    /**
+     * Konstruktor Hra<br>
+     * vytvara JPanel a nastavuje ho<br>
+     * nastavuje klavesy<br>
+     * vytvara instancie potrebnych tried<br>
+     * @throws IOException
+     */
     public Hra() throws IOException {
         this.setPreferredSize(new Dimension(Okno.getWIDTH(), Okno.getHEIGTH()));
         this.setDoubleBuffered(true);
@@ -69,7 +85,13 @@ public class Hra extends JPanel implements Runnable {
         this.stlp.pridajStlp(true);
 
     }
-    public void jump() throws IOException {
+
+    /**
+     * metoda ktora je zavolana pri stlaceni klavesy<br>
+     * v zavislosti od stavu hry ju bud zacne ak este nebezi alebo urobi vtak skok ak uz hra bezi
+     * @throws IOException
+     */
+    public void skok() throws IOException {
 
         if (this.gameOver) {
             this.vtak = new Vtak();
@@ -93,6 +115,10 @@ public class Hra extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * metoda ktora je zavolana pri stlaceni klavesy<br>
+     * pozastavi hru ak neni pozastavena a spusti hru ak je pozastavena
+     */
     public void pause() {
         if (this.started && !this.gameOver) {
             this.started = false;
@@ -102,6 +128,12 @@ public class Hra extends JPanel implements Runnable {
             this.paused = false;
         }
     }
+
+    /**
+     * metoda ktora je zavolana pri stlaceni klavesy<br>
+     * vrati pouzivatela na uvodnu obrazovku ak umrel(je v stave gameOver)
+     * @throws IOException
+     */
     public void menu() throws IOException {
         if (this.gameOver && !this.paused) {
             this.started = false;
@@ -116,15 +148,30 @@ public class Hra extends JPanel implements Runnable {
             this.gameOver = false;
         }
     }
+
+    /**
+     * metoda ktora je zavolana pri stlaceni klavesy<br>
+     * vyresetuje highscore na 0 ako v hre tak aj v subore
+     * @throws IOException
+     */
     public void resetskore() throws IOException {
         this.highskore = 0;
         this.suborSkore.setHighScore(this.highskore);
     }
 
+    /**
+     * vytvori a aktivuje thread
+     */
     public void startHernyThread() {
         this.hernyThread = new Thread(this);
         this.hernyThread.start();
     }
+
+    /**
+     * metoda kotra je zavolana pri stlaceni klavesy<br>
+     * zmeni obtiaznost hry (velkost medzery medzi stlpmi)
+     * a vytvori nove stlpy s upravenou medzerou
+     */
     public void zmenObtiaznost() {
         if (!this.started) {
             this.stlp.getStlpy().clear();
@@ -146,6 +193,11 @@ public class Hra extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * tato metoda sa vkuse opakuje kvoli Thread<br>
+     * hru zpomaluje na urceny pocet FPS<br>
+     * uz zpomalene vola metody update a repaint ktore updatuju fyziku hry a prekresluju obraz
+     */
     @Override
     public void run() {
 
@@ -182,16 +234,20 @@ public class Hra extends JPanel implements Runnable {
         }
     }
 
-
+    /**
+     * metoda obsahuje celu fyziku hru (cast kodu ktora je zavisla na fungujucom casu v hre)<br>
+     * tato metoda sa aktualizuje v urcenom intervale v metode run
+     * @throws IOException
+     */
     public void update() throws IOException {
         int rychlost = 6;
         if (this.started) {
-            //pohyb stlpov
+            //pohyb stlpov po X osi
             for (int i = 0; i < this.stlp.getStlpy().size(); i++) {
                 Rectangle stlpS = this.stlp.getStlpy().get(i);
                 stlpS.x -= rychlost;
             }
-            //yPohyb
+            //pohyb vtak po Y osi
             if (this.yPohyb < 15) {
                 this.yPohyb += 0.7;
             }
@@ -206,6 +262,7 @@ public class Hra extends JPanel implements Runnable {
                     }
                 }
             }
+            //nastavuje Y poziciu vtaka
             this.vtak.setVtakY((int)(this.vtak.getVtak().y + this.yPohyb));
 
             //akcie so stlpmi
@@ -215,8 +272,6 @@ public class Hra extends JPanel implements Runnable {
                 if (stlpS.y == 0 && this.vtak.getVtak().x + this.vtak.getVtak().width / 2 > stlpS.x + stlpS.width / 2 - 1
                         && this.vtak.getVtak().x + this.vtak.getVtak().width / 2 < stlpS.x + stlpS.width / 2 + 1) {
                     this.skore++;
-
-
                 }
                 //gameover ak vtak sa trafi so stlpom
                 if (stlpS.intersects(this.vtak.getVtak())) {
@@ -235,6 +290,7 @@ public class Hra extends JPanel implements Runnable {
                     }
                 }
             }
+            //nastavuje highscore na terajsie skore ak vyssie ako predosle highscore
             if (!this.gameOver && this.highskore < this.skore) {
                 this.highskore = this.skore;
                 this.suborSkore.setHighScore(this.highskore);
@@ -251,14 +307,20 @@ public class Hra extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * metoda sa stara o vykreslenie vsetkeho na platno<br>
+     * tato metoda sa aktualizuje v urcenom intervale v metode run
+     */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D)g;
+        //vykreslovanie vsetkych sucasti hry okrem stringov
         this.pozadie.vykresliPozadie(g2d);
         for (Rectangle stlpy : this.stlp.getStlpy()) {
             this.stlp.vykresliStlp(g2d, stlpy);
         }
         this.vtak.vykresliVtaka(g2d);
+        //vykreslovanie stringov
         g.setColor(Color.white);
         g.setFont(new Font("Arial", 0, 100));
 
@@ -269,7 +331,7 @@ public class Hra extends JPanel implements Runnable {
             g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 100, Okno.getHEIGTH() - 25);
             g.drawString("Stlač P pre zmenenie obtiažnosti", 120, Okno.getHEIGTH() - 70);
             g.setFont(new Font("Arial", 0, 15));
-            g.drawString("Verzia 0.8.1", Okno.getWIDTH() - 80, Okno.getHEIGTH() - 5);
+            g.drawString("Verzia 0.9", Okno.getWIDTH() - 80, Okno.getHEIGTH() - 5);
             g.setFont(new Font("Arial", 0, 20));
             switch (this.stlp.getMedzera()) {
                 case 400:
@@ -291,9 +353,8 @@ public class Hra extends JPanel implements Runnable {
             g.setFont(new Font("Arial", 0, 30));
             g.drawString("Stlač ESC pre vratenie na uvodnu obrazovku", 100, Okno.getHEIGTH() - 60);
             g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 100, Okno.getHEIGTH() - 25);
-
-
         }
+
         if (!this.gameOver && this.started) {
             if (this.skore < 10) {
                 g.drawString(String.valueOf(this.skore), Okno.getWIDTH() / 2 - 25, 150);
@@ -304,13 +365,15 @@ public class Hra extends JPanel implements Runnable {
             g.drawString("Stlač T pre pozastavenie hry", 200, Okno.getHEIGTH() - 60);
             g.drawString("Stlač R pre vynulovanie najvyššieho skóre", 100, Okno.getHEIGTH() - 25);
         }
+
         if (this.gameOver || this.started || !this.started) {
             g.setFont(new Font("Arial", 0, 30));
             g.drawString("Najvyššie skore: " + String.valueOf(this.highskore), Okno.getWIDTH() / 2 - 130, 30);
             g.setFont(new Font("Arial", 0, 10));
             g.setColor(Color.black);
-            g.drawString("FPS: " + String.valueOf(this.fpscounter), Okno.getWIDTH() - 38, 10);
+            //g.drawString("FPS: " + String.valueOf(this.fpscounter), Okno.getWIDTH() - 38, 10);
         }
+
         if (this.paused && !this.started && !this.gameOver) {
             g.setColor(Color.white);
             g.setFont(new Font("Arial", 0, 80));
@@ -327,16 +390,24 @@ public class Hra extends JPanel implements Runnable {
         }
     }
 
+    /**
+     * potrebna metoda pre kniznicu spravujucu klesove skratky<br>
+     * vola po stlaceni metodu skok
+     */
     public class Skok extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                Hra.this.jump();
+                Hra.this.skok();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         }
     }
+    /**
+     * potrebna metoda pre kniznicu spravujucu klesove skratky<br>
+     * vola po stlaceni metodu menu
+     */
     public class NavratDoMenu extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -347,12 +418,20 @@ public class Hra extends JPanel implements Runnable {
             }
         }
     }
+    /**
+     * potrebna metoda pre kniznicu spravujucu klesove skratky<br>
+     * vola po stlaceni metodu pause
+     */
     public class Pauza extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
             Hra.this.pause();
         }
     }
+    /**
+     * potrebna metoda pre kniznicu spravujucu klesove skratky<br>
+     * vola po stlaceni metodu resetskore
+     */
     public class ResetSkore extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -363,6 +442,10 @@ public class Hra extends JPanel implements Runnable {
             }
         }
     }
+    /**
+     * potrebna metoda pre kniznicu spravujucu klesove skratky<br>
+     * vola po stlaceni metodu zmenObtiaznost
+     */
     public class ZmenaObtiaznosti extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
